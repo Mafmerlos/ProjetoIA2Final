@@ -1,0 +1,533 @@
+﻿:root {
+  --fonte-titulo: 'Bebas Neue', cursive, sans-serif;
+  --fonte-texto: 'Caviar Dreams', 'Century Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --laranja: #ea580c;
+  --laranja-escuro: #9a3412;
+  --marrom: #7c2d12;
+  --borda: #fed7aa;
+  --fundo-claro: #fff7ed;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--fonte-texto);
+  background-color: #fffaf5;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.oculto { display: none !important; }
+
+/* ---------- cabecalho ---------- */
+.cabecalho {
+  background: #ffffff;
+  border-bottom: 1px solid var(--borda);
+  padding: 22px 20px 6px;
+}
+
+.titulo-bloco {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  font-size: 38px;
+  color: var(--laranja);
+  letter-spacing: 2px;
+}
+
+.texto-status {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 4px;
+  color: #6b7280;
+}
+.texto-status.online { color: #15803d; }
+.texto-status.sem-chave { color: #b45309; }
+.texto-status.offline { color: #b91c1c; }
+
+.navegacao {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.botao-aba {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 16px;
+  font-family: var(--fonte-texto);
+  font-size: 15px;
+  font-weight: 700;
+  color: #6b7280;
+  cursor: pointer;
+}
+.botao-aba.ativa {
+  color: var(--laranja);
+  border-bottom-color: var(--laranja);
+}
+
+/* ---------- conteudo ---------- */
+.conteudo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px 24px;
+}
+
+.central {
+  width: 100%;
+  max-width: 620px;
+}
+
+.alerta-erro {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cartao {
+  background: #ffffff;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.06);
+}
+
+.titulo-secao {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  font-size: 26px;
+  color: var(--laranja-escuro);
+  letter-spacing: 1.5px;
+}
+
+.instrucao {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 2px 0 14px;
+}
+
+/* ---------- formulario ---------- */
+.linha-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.linha-input input {
+  flex: 1;
+  min-width: 0;
+  background: var(--fundo-claro);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+}
+.linha-input input:focus { border-color: var(--laranja); }
+
+.botao-laranja {
+  background: var(--laranja);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bloco-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffedd5;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--laranja-escuro);
+}
+.tag button {
+  background: none;
+  border: none;
+  color: #c2410c;
+  font-family: var(--fonte-texto);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.texto-vazio {
+  font-size: 13px;
+  font-style: italic;
+  color: #9ca3af;
+}
+
+.divisor {
+  height: 1px;
+  background: #ffedd5;
+  margin: 14px 0;
+}
+
+.rotulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--marrom);
+  margin-bottom: 6px;
+}
+
+.linha-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.opcao {
+  background: var(--fundo-claro);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--marrom);
+  cursor: pointer;
+}
+.opcao.ativa {
+  background: var(--laranja);
+  border-color: var(--laranja);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.opcao-bebida {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--marrom);
+  cursor: pointer;
+}
+.opcao-bebida input { accent-color: var(--laranja); }
+
+.caixa-erro {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 8px;
+  margin-top: 10px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.botao-principal {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  background: var(--laranja);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: var(--fonte-titulo);
+  font-size: 22px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+}
+.botao-principal:disabled {
+  background: #fdba74;
+  cursor: default;
+}
+
+/* ---------- cartao da receita ---------- */
+.receita-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.receita-cabecalho .titulo-secao { font-size: 28px; flex: 1; }
+
+.acoes-topo { display: flex; gap: 6px; }
+
+.botao-salvar, .botao-copiar {
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  cursor: pointer;
+}
+.botao-salvar {
+  background: var(--fundo-claro);
+  border: 1px solid var(--borda);
+  color: var(--laranja-escuro);
+  font-weight: 700;
+}
+.botao-salvar.salva {
+  background: #ffedd5;
+  border-color: #f97316;
+  color: var(--laranja);
+}
+.botao-copiar {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.receita-original {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
+.receita-foto {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--borda);
+  margin-bottom: 14px;
+}
+
+.descricao {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #4b5563;
+  margin-bottom: 14px;
+}
+
+.linha-info {
+  display: flex;
+  justify-content: space-between;
+  background: var(--fundo-claro);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 16px;
+}
+.item-info { flex: 1; text-align: center; }
+.rotulo-info { display: block; font-size: 12px; font-weight: 600; color: var(--laranja-escuro); }
+.valor-info { display: block; font-size: 14px; font-weight: 700; color: var(--marrom); margin-top: 2px; }
+
+.bloco { margin-bottom: 16px; }
+.titulo-bloco-receita {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  font-size: 22px;
+  color: var(--laranja-escuro);
+  letter-spacing: 1.2px;
+  margin-bottom: 6px;
+}
+
+.item-ingrediente {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  color: #374151;
+}
+.item-ingrediente::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: var(--laranja);
+  vertical-align: middle;
+}
+
+.texto-opcionais {
+  font-size: 13px;
+  font-weight: 600;
+  font-style: italic;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.linha-passo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.numero-passo { font-family: var(--fonte-titulo); font-size: 18px; color: var(--laranja); }
+.texto-passo { flex: 1; font-size: 14px; font-weight: 600; line-height: 21px; color: #374151; }
+
+.caixa-dica, .caixa-bebida {
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+.caixa-dica { background: #fffbeb; border: 1px solid #fde68a; }
+.caixa-bebida { background: #f0f9ff; border: 1px solid #bae6fd; }
+
+.titulo-dica {
+  font-family: var(--fonte-titulo);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.caixa-dica .titulo-dica { color: #92400e; }
+.caixa-bebida .titulo-dica { color: #075985; }
+.texto-dica { font-size: 13px; font-weight: 600; line-height: 18px; }
+.caixa-dica .texto-dica { color: #78350f; }
+.caixa-bebida .texto-dica { color: #0c4a6e; }
+
+.bebida-foto {
+  float: right;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-left: 10px;
+}
+
+.rodape-fonte {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.botao-nova {
+  display: block;
+  width: 100%;
+  background: #ffedd5;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: var(--fonte-texto);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--laranja-escuro);
+  cursor: pointer;
+}
+.botao-outra { margin-bottom: 8px; background: var(--laranja); border-color: var(--laranja); color: #ffffff; }
+
+/* ---------- receitas salvas ---------- */
+.titulo-lista {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  font-size: 26px;
+  color: var(--laranja-escuro);
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+}
+
+.item-salvo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+.item-salvo .info { flex: 1; min-width: 180px; }
+.nome-salvo {
+  font-family: var(--fonte-titulo);
+  font-size: 20px;
+  color: var(--marrom);
+  letter-spacing: 1px;
+}
+.detalhes-salvo { font-size: 13px; font-weight: 600; color: #6b7280; margin-top: 2px; }
+.botoes-acao { display: flex; gap: 8px; }
+
+.botao-abrir, .botao-excluir {
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: var(--fonte-texto);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.botao-abrir { background: var(--laranja); color: #ffffff; }
+.botao-excluir { background: #fee2e2; color: #991b1b; }
+
+.vazio {
+  background: #ffffff;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 30px;
+  text-align: center;
+}
+.vazio h3 {
+  font-family: var(--fonte-titulo);
+  font-weight: normal;
+  font-size: 22px;
+  color: var(--laranja-escuro);
+  letter-spacing: 1.2px;
+  margin-bottom: 4px;
+}
+.vazio p { font-size: 13px; font-weight: 600; color: #9ca3af; }
+
+/* ---------- rodape ---------- */
+.rodape {
+  width: 100%;
+  max-width: 620px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
+  display: flex;
+  justify-content: flex-end;
+}
+.rodape-alunos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--marrom);
+  line-height: 18px;
+}
+
+@media (max-width: 480px) {
+  .titulo { font-size: 30px; }
+  .linha-info { flex-direction: column; gap: 8px; }
+  .receita-cabecalho { flex-direction: column; }
+}

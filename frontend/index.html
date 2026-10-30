@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistente de Receitas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%B3%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/caviar-dreams" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="titulo-bloco">
+      <h1 class="titulo">Assistente de Receitas</h1>
+      <p id="textoStatus" class="texto-status">Verificando servidor...</p>
+    </div>
+    <nav class="navegacao">
+      <button type="button" class="botao-aba ativa" data-aba="gerador">Gerar Receita</button>
+      <button type="button" class="botao-aba" data-aba="salvas">Receitas Salvas</button>
+    </nav>
+  </header>
+
+  <main class="conteudo">
+    <div class="central">
+      <div id="alertaErro" class="alerta-erro oculto"></div>
+
+      <!-- ABA: GERADOR -->
+      <section id="abaGerador">
+        <form id="formulario" class="cartao" autocomplete="off">
+          <h2 class="titulo-secao">Ingredientes Disponiveis</h2>
+          <p class="instrucao">Digite os itens que voce tem na cozinha para gerar uma receita:</p>
+
+          <div class="linha-input">
+            <input id="campoIngrediente" type="text" placeholder="Ex: frango, arroz, cebola...">
+            <button id="botaoAdicionar" type="button" class="botao-laranja">Adicionar</button>
+          </div>
+
+          <div id="blocoTags" class="bloco-tags"></div>
+
+          <div class="divisor"></div>
+
+          <p class="rotulo">Tipo de Refeicao:</p>
+          <div id="opcoesRefeicao" class="linha-opcoes"></div>
+
+          <label class="opcao-bebida">
+            <input id="querBebida" type="checkbox"> Sugerir uma bebida para acompanhar
+          </label>
+
+          <div id="erroFormulario" class="caixa-erro oculto"></div>
+
+          <button id="botaoCriar" type="submit" class="botao-principal">Criar Receita</button>
+        </form>
+
+        <article id="cartaoReceita" class="cartao oculto"></article>
+      </section>
+
+      <!-- ABA: SALVAS -->
+      <section id="abaSalvas" class="oculto"></section>
+    </div>
+
+    <footer class="rodape">
+      <div class="rodape-alunos">
+        <span>Matheus Figueira Merlos</span>
+        <span>João Pedro Marucci Pagluiso</span>
+      </div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
