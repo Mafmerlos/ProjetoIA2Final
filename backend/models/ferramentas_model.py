@@ -1,10 +1,12 @@
-﻿import unicodedata
+import unicodedata
 import requests
 
+# Endpoints publicos (chave gratuita "1") das duas APIs externas
 URL_MEALDB = "https://www.themealdb.com/api/json/v1/1"
 URL_COCKTAILDB = "https://www.thecocktaildb.com/api/json/v1/1"
 
 
+# Remove acentos e deixa em minusculas para comparar o tipo de refeicao com seguranca
 def _sem_acento(texto):
     return unicodedata.normalize("NFKD", str(texto)).encode("ascii", "ignore").decode().lower()
 
@@ -156,6 +158,7 @@ def ver_receita(id_receita: str) -> dict:
         return {"encontrou": False, "mensagem": "Receita nao encontrada."}
 
     r = receitas[0]
+    # A TheMealDB guarda os ingredientes em 20 campos separados (strIngredient1..20 e strMeasure1..20)
     ingredientes = []
     for i in range(1, 21):
         nome = (r.get(f"strIngredient{i}") or "").strip()
@@ -177,6 +180,7 @@ def ver_receita(id_receita: str) -> dict:
 
 def sugerir_bebida() -> dict:
     """Sugere uma bebida aleatoria para acompanhar a refeicao."""
+    # Consulta a API TheCocktailDB para sortear uma bebida real
     resposta = requests.get(f"{URL_COCKTAILDB}/random.php", timeout=10)
     b = resposta.json()["drinks"][0]
 

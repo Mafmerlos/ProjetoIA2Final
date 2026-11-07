@@ -1,4 +1,4 @@
-﻿import os
+import os
 import re
 import json
 import time
@@ -9,15 +9,18 @@ from models.ferramentas_model import FUNCOES
 
 load_dotenv()
 
+# Modelo principal rapido (responde melhor em horario de pico) e modelo reserva (fallback automatico)
 MODELO_PRINCIPAL = "gemini-3.1-flash-lite"
 MODELO_RESERVA = "gemini-3.8-flash"
 
 TIPOS_REFEICAO = ["Almoco/Jantar", "Cafe da Manha", "Lanche", "Sobremesa"]
 LIMITE_SEGUNDOS = 100  # tempo maximo de uma geracao (varias idas e voltas com o Gemini)
 
+# Inicializa o cliente da API do Gemini com timeout de 30s por chamada
 chave_gemini = os.getenv("GEMINI_API_KEY")
 cliente = genai.Client(api_key=chave_gemini, http_options={"timeout": 30000}) if chave_gemini else None
 
+# System Instruction: define o papel do assistente, as regras de validacao (2a barreira) e o formato JSON
 INSTRUCAO = """
 Voce e um chef assistente. Responda sempre em portugues do Brasil.
 Voce NAO inventa receitas: usa as funcoes para buscar receitas reais.
@@ -55,6 +58,7 @@ Resposta final: APENAS um objeto JSON valido (sem markdown, sem texto antes ou d
 O campo "bebida" so existe se sugerir_bebida foi chamada. Traduza tudo para portugues. Nao use markdown.
 """
 
+# Configuracao enviada ao Gemini: instrucao do sistema + lista das 3 ferramentas (Function Calling)
 config = types.GenerateContentConfig(
     system_instruction=INSTRUCAO,
     tools=list(FUNCOES.values()),
@@ -72,7 +76,40 @@ class ErroReceita(Exception):
         self.codigo = codigo
 
 
+# Lista de palavras fora do tema (perguntas, contas, programacao, objetos) barradas com 0 tokens gastos
+PALAVRAS_BLOQUEADAS = {
+    "quanto", "quantos", "qual", "quais", "quem", "como", "onde", "quando", "porque",
+    "calcule", "calcular", "soma", "somar", "menos", "vezes", "dividido", "igual",
+    "piada", "conte", "historia", "poema", "musica", "codigo", "programa", "python",
+    "javascript", "java", "html", "css", "sql", "ignore", "instrucoes", "prompt",
+    "sistema", "system", "futebol", "politica", "presidente", "capital", "pais",
+    "carro", "computador", "celular", "tijolo", "cimento", "cadeira", "mesa", "pedra",
+    "sapato", "roupa", "dinheiro", "banco", "jogo", "filme", "serie",
+}
+
+
+def _item_invalido(item):
+    # apenas letras, espacos e hifens (bloqueia numeros como "1+1", "123" e simbolos)
+    if len(item) < 2 or len(item) > 35 or not re.fullmatch(r"[A-Za-zÀ-ÿ\s\-]+", item):
+        return True
+    palavras = [
+        re.sub(r"[^a-z]", "", p.lower().translate(str.maketrans("áàâãéêíóôõúç", "aaaaeeiooouc")))
+        for p in item.split()
+    ]
+    # ingrediente real tem no maximo 4 palavras (bloqueia frases e perguntas)
+    if not palavras or len(palavras) > 4:
+        return True
+    # bloqueia letras repetidas sem sentido (ex: "aaaa", "xxxxx") ou sem vogal (ex: "bcdfg")
+    if any(re.search(r"(.)\1{2,}", p) or not re.search(r"[aeiouy]", p) for p in palavras if len(p) >= 2):
+        return True
+    # bloqueia palavras de perguntas, matematica, programacao ou objetos fora do tema
+    if any(p in PALAVRAS_BLOQUEADAS for p in palavras):
+        return True
+    return False
+
+
 def validar_formato_ingredientes(ingredientes):
+    # 1a Barreira (0 tokens): valida os dados no Python antes de chamar a API do Gemini
     if ingredientes is None or isinstance(ingredientes, (dict, bool, int, float)):
         return None, "Informe pelo menos um ingrediente."
 
@@ -85,18 +122,14 @@ def validar_formato_ingredientes(ingredientes):
     if len(lista) > 20:
         return None, "Informe no maximo 20 ingredientes."
 
-    invalidos = [
-        item for item in lista
-        if len(item) > 40
-        or len(re.findall(r"[A-Za-zÀ-ÿ]", item)) < 2
-        or not re.fullmatch(r"[A-Za-zÀ-ÿ0-9\s\-\.,/()]+", item)
-    ]
+    invalidos = [item for item in lista if _item_invalido(item)]
     if invalidos:
-        return None, f"Ingrediente(s) com formato invalido: {', '.join(invalidos)}. Use apenas nomes de alimentos (ate 40 caracteres)."
+        return None, f"Item(ns) invalido(s) ou fora do tema: {', '.join(invalidos)}. Informe apenas ingredientes culinarios."
 
     return lista, None
 
 
+# Traduz erros tecnicos da API do Gemini (429 cota, 503 sobrecarga, chave invalida) em mensagens amigaveis
 def traduzir_erro_gemini(erro):
     msg = str(erro).lower()
     if any(t in msg for t in ("429", "quota", "resource_exhausted", "rate limit", "too many requests")):
@@ -108,6 +141,7 @@ def traduzir_erro_gemini(erro):
     return None
 
 
+# Envia a conversa para o Gemini; se o modelo principal falhar, tenta automaticamente o modelo reserva
 def chamar_gemini(conteudos):
     if not cliente:
         raise ErroReceita("Chave de API do Gemini nao configurada no servidor.", 500)
@@ -122,6 +156,7 @@ def chamar_gemini(conteudos):
             raise traduzir_erro_gemini(erro_reserva) or traduzir_erro_gemini(erro) or erro_reserva
 
 
+# Monta o prompt do usuario com ingredientes, tipo de refeicao, bebida e ids para evitar
 def montar_pedido(lista_ingredientes, tipo_refeicao, quer_bebida, evitar):
     linhas = [
         f"Ingredientes do usuario: {', '.join(lista_ingredientes)}",
@@ -133,6 +168,7 @@ def montar_pedido(lista_ingredientes, tipo_refeicao, quer_bebida, evitar):
     return "\n".join(linhas)
 
 
+# Limpa possiveis marcacoes markdown (```json) e converte o texto final do Gemini em dicionario Python
 def extrair_json(texto):
     texto = (texto or "").strip()
     texto = re.sub(r"^```(?:json)?|```$", "", texto, flags=re.MULTILINE).strip()
@@ -143,11 +179,13 @@ def extrair_json(texto):
         return json.loads(trecho.group(0)) if trecho else None
 
 
+# Executa no Python as funcoes que o Gemini pediu (Function Calling) e empacota o retorno (function_response)
 def executar_funcoes(chamadas, funcoes_usadas, resultados, evitar):
     partes = []
     for chamada in chamadas:
         print(f"[Function Calling] Gemini chamou: {chamada.name}({dict(chamada.args or {})})", flush=True)
         try:
+            # Chama a funcao real do ferramentas_model.py desempacotando os argumentos enviados pelo Gemini
             resultado = FUNCOES[chamada.name](**(chamada.args or {}))
         except Exception as erro:
             resultado = {"erro": str(erro)}
@@ -169,6 +207,7 @@ def executar_funcoes(chamadas, funcoes_usadas, resultados, evitar):
 
 
 def gerar_receita(lista_ingredientes, tipo_refeicao, quer_bebida=False, evitar=None):
+    # Inicia o historico da conversa com o pedido do usuario
     conteudos = [types.Content(role="user", parts=[
         types.Part.from_text(text=montar_pedido(lista_ingredientes, tipo_refeicao, quer_bebida, evitar or []))
     ])]
@@ -177,17 +216,20 @@ def gerar_receita(lista_ingredientes, tipo_refeicao, quer_bebida=False, evitar=N
     evitar = set(evitar or [])
     inicio = time.time()
 
+    # Loop manual de Function Calling (maximo de 6 voltas para evitar loop infinito)
     for _ in range(6):
         if time.time() - inicio > LIMITE_SEGUNDOS:
             raise ErroReceita("A busca demorou demais. Tente novamente.", 504)
 
         resposta = chamar_gemini(conteudos)
 
+        # Se o Gemini pediu para executar funcoes, executa e devolve os resultados na proxima volta do loop
         if resposta.function_calls:
             conteudos.append(resposta.candidates[0].content)
             conteudos.append(executar_funcoes(resposta.function_calls, funcoes_usadas, resultados, evitar))
             continue
 
+        # Se nao pediu funcao, o Gemini devolveu a resposta final em JSON
         try:
             receita = extrair_json(resposta.text)
         except ValueError:
@@ -207,6 +249,7 @@ def gerar_receita(lista_ingredientes, tipo_refeicao, quer_bebida=False, evitar=N
     if not isinstance(receita, dict):
         raise ErroReceita("Nao consegui montar a receita agora. Tente novamente.", 500)
 
+    # 2a Barreira: o Gemini identificou que algum item nao e alimento e encerrou sem chamar funcoes
     if receita.get("ingredientesValidos") is False:
         itens = ", ".join(receita.get("itensInvalidos") or [])
         raise ErroReceita(f"Estes itens nao parecem alimentos: {itens}. Use apenas ingredientes culinarios.", 422)
@@ -214,6 +257,7 @@ def gerar_receita(lista_ingredientes, tipo_refeicao, quer_bebida=False, evitar=N
     if receita.get("semReceita"):
         raise ErroReceita(receita.get("mensagem") or "Nao encontrei receitas com esses ingredientes.", 404)
 
+    # Anti-alucinacao: garante que a funcao ver_receita foi realmente chamada e retornou uma receita real
     detalhes = resultados.get("ver_receita")
     if not detalhes or not detalhes.get("encontrou"):
         raise ErroReceita("Nao consegui buscar uma receita real agora. Tente novamente.", 502)

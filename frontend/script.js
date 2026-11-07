@@ -1,4 +1,4 @@
-﻿const URL_BASE = "http://localhost:5000/api";
+const URL_BASE = "http://localhost:5000/api";
 const TIPOS_REFEICAO = ["Almoco/Jantar", "Cafe da Manha", "Lanche", "Sobremesa"];
 
 const textoStatus = document.getElementById("textoStatus");
@@ -24,6 +24,7 @@ let idsVistos = [];
 let chaveBusca = "";
 
 // ---------- utilidades ----------
+// Cria elementos HTML usando textContent (nunca innerHTML) para impedir ataques XSS
 function el(tag, classe, texto) {
   const e = document.createElement(tag);
   if (classe) e.className = classe;
@@ -111,14 +112,43 @@ function mostrarErroFormulario(texto, ms) {
   if (texto && ms) setTimeout(() => erroFormulario.classList.add("oculto"), ms);
 }
 
+// Palavras fora do tema (perguntas, matematica, programacao, objetos) bloqueadas ja no front-end
+const PALAVRAS_BLOQUEADAS = new Set([
+  "quanto", "quantos", "qual", "quais", "quem", "como", "onde", "quando", "porque",
+  "calcule", "calcular", "soma", "somar", "menos", "vezes", "dividido", "igual",
+  "piada", "conte", "historia", "poema", "musica", "codigo", "programa", "python",
+  "javascript", "java", "html", "css", "sql", "ignore", "instrucoes", "prompt",
+  "sistema", "system", "futebol", "politica", "presidente", "capital", "pais",
+  "carro", "computador", "celular", "tijolo", "cimento", "cadeira", "mesa", "pedra",
+  "sapato", "roupa", "dinheiro", "banco", "jogo", "filme", "serie",
+]);
+
+// Valida se o item tem apenas letras, ate 4 palavras e nao contem termos fora do tema
+function ingredienteValido(item) {
+  if (item.length < 2 || item.length > 35 || !/^[A-Za-zÀ-ÿ\s\-]+$/.test(item)) return false;
+  const palavras = item.trim().split(/\s+/);
+  if (palavras.length > 4) return false;
+  return !palavras.some((p) => {
+    const limpa = p.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]/g, "");
+    return (
+      PALAVRAS_BLOQUEADAS.has(limpa) ||
+      /(.)\1{2,}/i.test(limpa) ||
+      (limpa.length >= 2 && !/[aeiouy]/i.test(limpa))
+    );
+  });
+}
+
 function adicionarIngrediente() {
   // aceita varios de uma vez separados por virgula
   const itens = campoIngrediente.value.split(",").map((i) => i.trim()).filter(Boolean);
-  if (itens.length === 0) return;
+  if (itens.length === 0) return true;
 
+  const invalidos = [];
   const repetidos = [];
   itens.forEach((item) => {
-    if (listaIngredientes.some((i) => i.toLowerCase() === item.toLowerCase())) {
+    if (!ingredienteValido(item)) {
+      invalidos.push(item);
+    } else if (listaIngredientes.some((i) => i.toLowerCase() === item.toLowerCase())) {
       repetidos.push(item);
     } else {
       listaIngredientes.push(item);
@@ -127,7 +157,13 @@ function adicionarIngrediente() {
 
   campoIngrediente.value = "";
   renderizarTags();
+
+  if (invalidos.length) {
+    mostrarErroFormulario(`Item(ns) invalido(s): "${invalidos.join(", ")}". Digite apenas nomes de alimentos (sem numeros ou frases).`, 4000);
+    return false;
+  }
   mostrarErroFormulario(repetidos.length ? `"${repetidos.join(", ")}" ja foi adicionado.` : "", 2500);
+  return true;
 }
 
 botaoAdicionar.addEventListener("click", adicionarIngrediente);
@@ -144,7 +180,9 @@ formulario.addEventListener("submit", async (e) => {
   if (carregando) return;
 
   // se o usuario digitou algo e nao clicou em Adicionar, considera o texto
-  if (campoIngrediente.value.trim()) adicionarIngrediente();
+  if (campoIngrediente.value.trim()) {
+    if (!adicionarIngrediente()) return;
+  }
 
   if (listaIngredientes.length === 0) {
     mostrarErroFormulario("Adicione ao menos um ingrediente.");

@@ -1,4 +1,4 @@
-﻿# Assistente de Receitas - Projeto Final IA 2
+# Assistente de Receitas - Projeto Final IA 2
 
 O usuário informa os ingredientes que tem em casa e o tipo de refeição. O Gemini usa **Function Calling** para buscar uma receita real (TheMealDB), traduzi-la para português e, se o usuário quiser, sugerir uma bebida (TheCocktailDB).
 
@@ -52,13 +52,12 @@ Projeto Final/
 
 ---
 
-## Fluxo
+## Fluxo e Proteção de Tokens (3 Camadas)
 
-1. O front envia `POST /api/receitas/gerar` com `{ingredientes, tipoRefeicao, bebida, evitar}`.
-2. O Gemini traduz os ingredientes para inglês e pede `buscar_receitas_por_ingredientes`.
-3. O backend executa a função (API externa) e devolve o resultado ao Gemini.
-4. O Gemini escolhe uma receita e pede `ver_receita` (e `sugerir_bebida`, se pedido).
-5. O Gemini devolve a receita traduzida em JSON; o backend acrescenta a foto e a fonte vindas direto da API e responde ao front.
+1. **1ª Barreira no Front-end (`script.js` — 0 tokens)**: `ingredienteValido()` bloqueia números (`1+1`), símbolos, frases (> 4 palavras), letras sem vogal e palavras fora do tema (`PALAVRAS_BLOQUEADAS`) antes mesmo de enviar ao servidor.
+2. **2ª Barreira no Back-end Python (`receita_model.py` — 0 tokens)**: `validar_formato_ingredientes()` valida os mesmos critérios no servidor e retorna `HTTP 400` imediatamente sem chamar o Gemini.
+3. **3ª Barreira no System Prompt (`INSTRUCAO`)**: Se passar alguma palavra que não seja alimento, o Gemini não chama nenhuma função e devolve `{"ingredientesValidos": false}`, encerrando na 1ª chamada com `HTTP 422`.
+4. **Function Calling Real**: Para ingredientes válidos, o Gemini traduz para inglês e pede `buscar_receitas_por_ingredientes` → o backend consulta a TheMealDB → o Gemini escolhe um prato e pede `ver_receita` (e `sugerir_bebida`, se marcado) → o Gemini traduz tudo em JSON e o backend injeta a foto e o ID originais da API.
 
 ---
 
