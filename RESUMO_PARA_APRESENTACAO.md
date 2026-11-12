@@ -1,6 +1,6 @@
 # Resumo de Estudo Completo — Assistente de Receitas (Projeto Final IA 2)
 
-**Integrantes:** Matheus Figueira Merlos e João Pedro Marucci Pagluiso  
+**Integrantes:** Matheus Figueira Merlos, João Pedro Marucci Pagluiso e Gustavo Scandelae de Flores  
 **Tecnologias:** Python + Flask (Padrão MVC) | Google Gemini (`google-genai`) + Function Calling | TheMealDB + TheCocktailDB | HTML + CSS + JavaScript Puro
 
 ---

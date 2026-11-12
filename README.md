@@ -2,7 +2,7 @@
 
 O usuário informa os ingredientes que tem em casa e o tipo de refeição. O Gemini usa **Function Calling** para buscar uma receita real (TheMealDB), traduzi-la para português e, se o usuário quiser, sugerir uma bebida (TheCocktailDB).
 
-**Integrantes:** Matheus Figueira Merlos e João Pedro Marucci Pagluiso
+**Integrantes:** Matheus Figueira Merlos, João Pedro Marucci Pagluiso e Gustavo Scandelae de Flores
 
 ---
 
