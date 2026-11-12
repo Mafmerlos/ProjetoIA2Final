@@ -368,10 +368,6 @@ function renderizarReceita() {
     cartaoReceita.appendChild(caixa);
   }
 
-  const fonte = r.fonte ? `Receita real: ${r.fonte}` : "";
-  const funcoes = r.funcoes && r.funcoes.length ? ` | Funcoes chamadas pelo Gemini: ${r.funcoes.join(", ")}` : "";
-  if (fonte || funcoes) cartaoReceita.appendChild(el("p", "rodape-fonte", fonte + funcoes));
-
   const outra = el("button", "botao-nova botao-outra", "Outra receita com esses ingredientes");
   outra.type = "button";
   outra.addEventListener("click", () => formulario.requestSubmit());
